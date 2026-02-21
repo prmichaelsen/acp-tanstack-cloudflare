@@ -19,11 +19,14 @@ Or using the installation script:
 <!-- ACP_AUTO_UPDATE_START:CONTENTS -->
 ### Commands
 
-(No commands yet - use @acp.command-create to add commands)
+- **[deploy](agent/commands/tanstack-cloudflare.deploy.md)** - Build and deploy TanStack Start application to Cloudflare Workers using local environment configuration
+- **[tail](agent/commands/tanstack-cloudflare.tail.md)** - Stream real-time logs from deployed TanStack Start application on Cloudflare Workers
 
 ### Patterns
 
-(No patterns yet - use @acp.pattern-create to add patterns)
+- **[library-services](agent/patterns/tanstack-cloudflare.library-services.md)** - Service layer architecture for data access operations with database and API service separation
+- **[ssr-preload](agent/patterns/tanstack-cloudflare.ssr-preload.md)** - Server-side data preloading using TanStack Router's beforeLoad to eliminate loading states
+- **[user-scoped-collections](agent/patterns/tanstack-cloudflare.user-scoped-collections.md)** - Firestore subcollection pattern for user-specific data isolation and security
 
 ### Designs
 
