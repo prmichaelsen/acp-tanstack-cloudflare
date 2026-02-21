@@ -340,6 +340,85 @@ echo "${GREEN}✓${NC} Created package.yaml"
 echo "${GREEN}✓${NC} Configured release branch: ${RELEASE_BRANCH}"
 echo ""
 
+# Step 4.5: Create progress.yaml for package development
+echo "${BOLD}Creating Progress Tracking${NC}"
+echo ""
+
+CURRENT_DATE=$(date +%Y-%m-%d)
+
+cat > "agent/progress.yaml" << EOF
+# Package Development Progress Tracking
+# ACP Package: ${PACKAGE_NAME}
+
+project:
+  name: ${PACKAGE_NAME}
+  version: 1.0.0
+  type: package
+  started: ${CURRENT_DATE}
+  status: in_progress
+  current_milestone: null
+  description: |
+    ACP Package: ${DESCRIPTION}
+
+milestones: []
+
+tasks: {}
+
+documentation:
+  design_documents: 0
+  milestone_documents: 0
+  pattern_documents: 0
+  task_documents: 0
+  command_documents: 0
+  last_updated: ${CURRENT_DATE}
+
+progress:
+  planning: 0
+  implementation: 0
+  testing: 0
+  documentation: 0
+  overall: 0
+
+recent_work:
+  - date: ${CURRENT_DATE}
+    description: |
+      📦 Package Created: ${PACKAGE_NAME}
+      Initial package structure created. Ready for content development.
+    items:
+      - ✅ Created package.yaml with metadata
+      - ✅ Installed full ACP (templates, commands, scripts)
+      - ✅ Created README.md, LICENSE, CHANGELOG.md
+      - ✅ Initialized git repository
+      - ✅ Installed pre-commit hook
+      - ✅ Created progress.yaml for development tracking
+      - 📋 Ready to add content with entity creation commands
+
+next_steps:
+  - Add patterns using @acp.pattern-create
+  - Add commands using @acp.command-create
+  - Add designs using @acp.design-create
+  - Create milestones and tasks as needed
+  - Validate package with @acp.package-validate
+  - Publish with @acp.package-publish
+
+notes:
+  - This is an ACP package repository
+  - Use entity creation commands to add content
+  - Create milestones and tasks as you plan development
+  - progress.yaml is for development only (not installed to user projects)
+
+current_blockers: []
+
+team:
+  - role: Package Author
+    name: ${AUTHOR}
+    focus: |
+      Developing ${PACKAGE_NAME} package
+EOF
+
+echo "${GREEN}✓${NC} Created progress.yaml for package development tracking"
+echo ""
+
 # Step 5: Create README.md
 echo "${BOLD}Creating Documentation${NC}"
 echo ""
@@ -350,6 +429,23 @@ cat > "README.md" << EOF
 ${DESCRIPTION}
 
 ## Installation
+
+### Quick Start (Bootstrap New Project)
+
+Install ACP and this package in one command:
+
+\`\`\`bash
+curl -fsSL ${REPO_URL%.git}/raw/${RELEASE_BRANCH}/scripts/bootstrap.sh | bash
+\`\`\`
+
+This will:
+1. Install ACP if not already installed
+2. Install this package
+3. Initialize your project with ACP
+
+### Install Package Only (ACP Already Installed)
+
+If you already have ACP installed in your project:
 
 \`\`\`bash
 @acp.package-install ${REPO_URL}
@@ -527,12 +623,103 @@ venv/
 dist/
 build/
 
-# ACP local files
-agent/manifest.yaml
-agent/progress.yaml
+# ACP local files (none - all ACP files should be committed)
 EOF
 
 echo "${GREEN}✓${NC} Created .gitignore"
+echo ""
+
+# Step 8.5: Create bootstrap.sh script
+mkdir -p scripts
+
+cat > "scripts/bootstrap.sh" << 'BOOTSTRAP_EOF'
+#!/bin/bash
+# Bootstrap script for installing ACP and this package in one command
+# Usage: curl -fsSL https://github.com/{owner}/{repo}/raw/{branch}/scripts/bootstrap.sh | bash
+
+set -e
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+echo ""
+echo "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo "${BOLD}  ACP Package Bootstrap${NC}"
+echo "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+
+# Check if ACP is already installed
+if [ ! -f "AGENT.md" ] || [ ! -d "agent" ]; then
+    echo "${BLUE}Installing ACP...${NC}"
+    echo ""
+    
+    # Install ACP
+    curl -fsSL https://raw.githubusercontent.com/prmichaelsen/agent-context-protocol/mainline/agent/scripts/acp.install.sh | bash
+    
+    if [ $? -eq 0 ]; then
+        echo ""
+        echo "${GREEN}✓${NC} ACP installed successfully"
+        echo ""
+    else
+        echo ""
+        echo "${RED}✗${NC} ACP installation failed"
+        exit 1
+    fi
+else
+    echo "${GREEN}✓${NC} ACP already installed"
+    echo ""
+fi
+
+# Install this package
+BOOTSTRAP_EOF
+
+# Add package-specific installation command
+cat >> "scripts/bootstrap.sh" << EOF
+echo "\${BLUE}Installing ${PACKAGE_NAME} package...\${NC}"
+echo ""
+
+# Install package using acp.package-install.sh
+if [ -f "./agent/scripts/acp.package-install.sh" ]; then
+    ./agent/scripts/acp.package-install.sh ${REPO_URL}
+    
+    if [ \$? -eq 0 ]; then
+        echo ""
+        echo "\${GREEN}✓\${NC} ${PACKAGE_NAME} package installed successfully"
+        echo ""
+    else
+        echo ""
+        echo "\${RED}✗\${NC} Package installation failed"
+        exit 1
+    fi
+else
+    echo "\${RED}✗\${NC} ACP installation script not found"
+    echo "Please ensure ACP is properly installed"
+    exit 1
+fi
+
+echo ""
+echo "\${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\${NC}"
+echo "\${GREEN}✓\${NC} \${BOLD}Bootstrap Complete!\${NC}"
+echo "\${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\${NC}"
+echo ""
+echo "Your project is now set up with:"
+echo "  • ACP (Agent Context Protocol)"
+echo "  • ${PACKAGE_NAME} package"
+echo ""
+echo "Next steps:"
+echo "  1. Run: @acp.init"
+echo "  2. Start working with your AI agent"
+echo ""
+EOF
+
+chmod +x scripts/bootstrap.sh
+
+echo "${GREEN}✓${NC} Created scripts/bootstrap.sh"
 echo ""
 
 # Step 9: Install pre-commit hook
@@ -641,6 +828,25 @@ echo "  ${GREEN}✓${NC} Full ACP installation (all templates and commands)"
 echo "  ${GREEN}✓${NC} Pre-commit hook (validates package.yaml before commits)"
 echo "  ${GREEN}✓${NC} Release branch configured (${RELEASE_BRANCH})"
 echo "  ${GREEN}✓${NC} Git repository initialized"
+echo "  ${GREEN}✓${NC} Bootstrap script (scripts/bootstrap.sh)"
+echo "  ${GREEN}✓${NC} Progress tracking (agent/progress.yaml)"
+echo ""
+echo "${BOLD}💡 Bootstrap Installation:${NC}"
+echo ""
+echo "Once published, users can install ACP + your package in one command:"
+echo ""
+echo "  ${YELLOW}curl -fsSL ${REPO_URL%.git}/raw/${RELEASE_BRANCH}/scripts/bootstrap.sh | bash${NC}"
+echo ""
+echo "This is perfect for bootstrapping new projects!"
+echo ""
+echo "${BOLD}💡 Progress Tracking:${NC}"
+echo ""
+echo "Use standard ACP commands to track package development:"
+echo "  ${YELLOW}@acp.init${NC}     - Initialize context"
+echo "  ${YELLOW}@acp.status${NC}   - Check development status"
+echo "  ${YELLOW}@acp.proceed${NC}  - Work on tasks"
+echo ""
+echo "Create milestones and tasks as you plan development."
 echo ""
 echo "Ready to add content with @acp.pattern-create, @acp.command-create, @acp.design-create"
 echo ""

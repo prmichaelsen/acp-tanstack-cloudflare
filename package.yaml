@@ -17,23 +17,13 @@ release:
 # These commands automatically update this section
 contents:
   patterns:
-    - file: agent/patterns/tanstack-cloudflare.library-services.md
-      name: library-services
-      description: Service layer architecture for data access operations with database and API service separation
-    - file: agent/patterns/tanstack-cloudflare.ssr-preload.md
-      name: ssr-preload
-      description: Server-side data preloading using TanStack Router's beforeLoad to eliminate loading states
-    - file: agent/patterns/tanstack-cloudflare.user-scoped-collections.md
-      name: user-scoped-collections
-      description: Firestore subcollection pattern for user-specific data isolation and security
+    - name: tanstack-cloudflare.library-services.md
+    - name: tanstack-cloudflare.ssr-preload.md
+    - name: tanstack-cloudflare.user-scoped-collections.md
   
   commands:
-    - file: agent/commands/tanstack-cloudflare.deploy.md
-      name: deploy
-      description: Build and deploy TanStack Start application to Cloudflare Workers using local environment configuration
-    - file: agent/commands/tanstack-cloudflare.tail.md
-      name: tail
-      description: Stream real-time logs from deployed TanStack Start application on Cloudflare Workers
+    - name: tanstack-cloudflare.deploy.md
+    - name: tanstack-cloudflare.tail.md
   
   designs: []
 

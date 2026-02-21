@@ -122,7 +122,7 @@ validate_file_existence() {
     if yaml_has_key "package.yaml" "contents.patterns"; then
         local pattern_count=$(yaml_get_array "package.yaml" "contents.patterns" | wc -l)
         for i in $(seq 0 $((pattern_count - 1))); do
-            local pattern_name=$(yaml_get "package.yaml" "contents.patterns[$i].name" 2>/dev/null)
+            local pattern_name=$(yaml_get_nested "package.yaml" "contents.patterns[$i].name")
             if [ -n "$pattern_name" ]; then
                 total_files=$((total_files + 1))
                 check
@@ -140,7 +140,7 @@ validate_file_existence() {
     if yaml_has_key "package.yaml" "contents.commands"; then
         local command_count=$(yaml_get_array "package.yaml" "contents.commands" | wc -l)
         for i in $(seq 0 $((command_count - 1))); do
-            local command_name=$(yaml_get "package.yaml" "contents.commands[$i].name" 2>/dev/null)
+            local command_name=$(yaml_get_nested "package.yaml" "contents.commands[$i].name")
             if [ -n "$command_name" ]; then
                 total_files=$((total_files + 1))
                 check
@@ -158,7 +158,7 @@ validate_file_existence() {
     if yaml_has_key "package.yaml" "contents.designs"; then
         local design_count=$(yaml_get_array "package.yaml" "contents.designs" | wc -l)
         for i in $(seq 0 $((design_count - 1))); do
-            local design_name=$(yaml_get "package.yaml" "contents.designs[$i].name" 2>/dev/null)
+            local design_name=$(yaml_get_nested "package.yaml" "contents.designs[$i].name")
             if [ -n "$design_name" ]; then
                 total_files=$((total_files + 1))
                 check
@@ -262,6 +262,36 @@ validate_namespace_consistency() {
     
     local namespace="$PACKAGE_NAME"
     local inconsistent=0
+    local skipped=0
+    
+    # Read package.yaml contents to know which files should be validated
+    # Build list of filenames from contents (extract .name from each object)
+    local package_commands=""
+    if yaml_has_key "package.yaml" "contents.commands"; then
+        local command_count=$(yaml_get_array "package.yaml" "contents.commands" | wc -l)
+        for i in $(seq 0 $((command_count - 1))); do
+            local cmd_name=$(yaml_get_nested "package.yaml" "contents.commands[$i].name")
+            [ -n "$cmd_name" ] && package_commands="${package_commands}${cmd_name}"$'\n'
+        done
+    fi
+    
+    local package_patterns=""
+    if yaml_has_key "package.yaml" "contents.patterns"; then
+        local pattern_count=$(yaml_get_array "package.yaml" "contents.patterns" | wc -l)
+        for i in $(seq 0 $((pattern_count - 1))); do
+            local pat_name=$(yaml_get_nested "package.yaml" "contents.patterns[$i].name")
+            [ -n "$pat_name" ] && package_patterns="${package_patterns}${pat_name}"$'\n'
+        done
+    fi
+    
+    local package_designs=""
+    if yaml_has_key "package.yaml" "contents.designs"; then
+        local design_count=$(yaml_get_array "package.yaml" "contents.designs" | wc -l)
+        for i in $(seq 0 $((design_count - 1))); do
+            local des_name=$(yaml_get_nested "package.yaml" "contents.designs[$i].name")
+            [ -n "$des_name" ] && package_designs="${package_designs}${des_name}"$'\n'
+        done
+    fi
     
     # Check command files
     if [ -d "agent/commands" ]; then
@@ -273,6 +303,13 @@ validate_namespace_consistency() {
             [[ "$basename" == *.template.md ]] && continue
             [[ "$basename" == acp.* ]] && continue
             [[ "$basename" == local.* ]] && continue
+            
+            # Check if file is in package.yaml contents
+            if ! echo "$package_commands" | grep -q "^${basename}$"; then
+                info "Skipping namespace check (not in package contents): $basename"
+                skipped=$((skipped + 1))
+                continue
+            fi
             
             # Check if filename starts with namespace
             if [[ ! "$basename" =~ ^${namespace}\. ]]; then
@@ -292,6 +329,13 @@ validate_namespace_consistency() {
             # Skip templates
             [[ "$basename" == *.template.md ]] && continue
             
+            # Check if file is in package.yaml contents
+            if ! echo "$package_patterns" | grep -q "^${basename}$"; then
+                info "Skipping namespace check (not in package contents): $basename"
+                skipped=$((skipped + 1))
+                continue
+            fi
+            
             # Patterns may or may not use namespace - just warn if inconsistent
             if [[ "$basename" =~ ^${namespace}\. ]]; then
                 # Has namespace - good
@@ -303,10 +347,33 @@ validate_namespace_consistency() {
         done
     fi
     
+    # Check design files
+    if [ -d "agent/design" ]; then
+        for file in agent/design/*.md; do
+            [ -f "$file" ] || continue
+            local basename=$(basename "$file")
+            
+            # Skip templates
+            [[ "$basename" == *.template.md ]] && continue
+            [[ "$basename" == .gitkeep ]] && continue
+            
+            # Check if file is in package.yaml contents
+            if ! echo "$package_designs" | grep -q "^${basename}$"; then
+                info "Skipping namespace check (not in package contents): $basename"
+                skipped=$((skipped + 1))
+                continue
+            fi
+        done
+    fi
+    
     check
     if [ "$inconsistent" -eq 0 ]; then
-        pass "All command files use '$namespace' namespace"
-        pass "Pattern namespace usage noted"
+        pass "All package content files use correct namespace"
+        if [ "$skipped" -gt 0 ]; then
+            info "$skipped file(s) skipped (not in package.yaml contents)"
+            info "These files won't be installed to user projects"
+            info "This is normal for installed dependencies (tracked in manifest.yaml)"
+        fi
     else
         error "$inconsistent file(s) with namespace issues"
     fi
