@@ -27,4 +27,3 @@ build/
 
 # ACP local files
 agent/manifest.yaml
-agent/progress.yaml
