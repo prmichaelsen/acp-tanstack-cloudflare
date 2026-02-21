@@ -188,6 +188,36 @@ check_unlisted_files() {
     
     local unlisted=0
     
+    # Get files from manifest (all packages including acp-core)
+    local manifest_files=""
+    if [ -f "agent/manifest.yaml" ]; then
+        # Get list of all packages
+        local packages=$(yaml_get_array "agent/manifest.yaml" "packages" 2>/dev/null || echo "")
+        
+        # For each package, extract all file names
+        for pkg in $packages; do
+            # Try to get files from each section
+            local pkg_commands=$(yaml_get_array "agent/manifest.yaml" "packages.${pkg}.files.commands" 2>/dev/null || echo "")
+            local pkg_patterns=$(yaml_get_array "agent/manifest.yaml" "packages.${pkg}.files.patterns" 2>/dev/null || echo "")
+            local pkg_designs=$(yaml_get_array "agent/manifest.yaml" "packages.${pkg}.files.designs" 2>/dev/null || echo "")
+            
+            # Extract name field from each file entry
+            for i in $(seq 0 100); do
+                local cmd=$(yaml_get_nested "agent/manifest.yaml" "packages.${pkg}.files.commands[$i].name" 2>/dev/null)
+                [ -n "$cmd" ] && manifest_files="${manifest_files}${cmd}"$'\n'
+                
+                local pat=$(yaml_get_nested "agent/manifest.yaml" "packages.${pkg}.files.patterns[$i].name" 2>/dev/null)
+                [ -n "$pat" ] && manifest_files="${manifest_files}${pat}"$'\n'
+                
+                local des=$(yaml_get_nested "agent/manifest.yaml" "packages.${pkg}.files.designs[$i].name" 2>/dev/null)
+                [ -n "$des" ] && manifest_files="${manifest_files}${des}"$'\n'
+                
+                # Break if all are empty (no more files)
+                [ -z "$cmd" ] && [ -z "$pat" ] && [ -z "$des" ] && break
+            done
+        done
+    fi
+    
     # Check patterns directory
     if [ -d "agent/patterns" ]; then
         for file in agent/patterns/*.md; do
@@ -197,6 +227,11 @@ check_unlisted_files() {
             # Skip templates
             [[ "$basename" == *.template.md ]] && continue
             [[ "$basename" == ".gitkeep" ]] && continue
+            
+            # Skip if in manifest (installed from another package)
+            if echo "$manifest_files" | grep -q "^${basename}$"; then
+                continue
+            fi
             
             # Check if listed in package.yaml
             if ! grep -q "name: $basename" package.yaml 2>/dev/null; then
@@ -213,10 +248,13 @@ check_unlisted_files() {
             [ -f "$file" ] || continue
             local basename=$(basename "$file")
             
-            # Skip templates and non-package commands
+            # Skip templates
             [[ "$basename" == *.template.md ]] && continue
-            [[ "$basename" == acp.* ]] && continue  # Skip core ACP commands
-            [[ "$basename" == local.* ]] && continue  # Skip local commands
+            
+            # Skip if in manifest (installed from another package, including acp-core)
+            if echo "$manifest_files" | grep -q "^${basename}$"; then
+                continue
+            fi
             
             # Check if listed in package.yaml
             if ! grep -q "name: $basename" package.yaml 2>/dev/null; then
@@ -236,6 +274,11 @@ check_unlisted_files() {
             # Skip templates and .gitkeep
             [[ "$basename" == *.template.md ]] && continue
             [[ "$basename" == ".gitkeep" ]] && continue
+            
+            # Skip if in manifest (installed from another package)
+            if echo "$manifest_files" | grep -q "^${basename}$"; then
+                continue
+            fi
             
             # Check if listed in package.yaml
             if ! grep -q "name: $basename" package.yaml 2>/dev/null; then
