@@ -81,24 +81,35 @@ progress:
 
 recent_work:
   - date: 2026-02-21
-    description: Completed core content milestone
+    description: Completed core content milestone and ACP updates
     items:
       - ✅ Converted 3 patterns to proper namespaced format
       - ✅ Created 2 deployment/debugging commands
       - ✅ Updated package.yaml and README.md
       - ✅ Version bumped to 1.1.0
       - ✅ Created comprehensive CHANGELOG entry
-      - ✅ Committed changes (commit ee388aa)
-      - ✅ Created 2 bug reports for ACP improvements
+      - ✅ Committed changes (commits: ee388aa, 760411a, 408faf7)
+      - ✅ Created 5 bug reports for ACP improvements
       - ✅ Created progress.yaml for package tracking
+      - ✅ Updated ACP twice to get latest fixes
+      - ✅ Fixed package.yaml format to match official template
 
 next_steps:
-  - Push changes to remote (git push)
+  - Push all changes to remote (git push)
+  - Wait for ACP bug fixes to be implemented
+  - Retry package validation when fixes are available
+  - Publish package with @acp.package-publish
 
 notes:
   - This is an ACP package repository for TanStack Start + Cloudflare Workers patterns
   - Package contains 3 patterns and 2 commands
   - All files follow ACP conventions with tanstack-cloudflare namespace
-  - Bug reports created for ACP maintainer (manifest system, progress.yaml for packages)
+  - Created 5 bug reports for ACP maintainer:
+    - BR-001: Package manifest for dev dependencies
+    - BR-002: Progress.yaml for package repositories
+    - BR-003: package.yaml schema mismatch
+    - BR-004: manifest.yaml should track core commands
+    - BR-005: Installation test should run after publishing
+  - Package format is correct, waiting for ACP parser enhancements
 
 current_blockers: []
