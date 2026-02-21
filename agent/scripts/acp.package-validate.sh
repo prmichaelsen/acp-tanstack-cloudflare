@@ -189,33 +189,10 @@ check_unlisted_files() {
     local unlisted=0
     
     # Get files from manifest (all packages including acp-core)
+    # Use simple grep to extract all "- name: filename" entries
     local manifest_files=""
     if [ -f "agent/manifest.yaml" ]; then
-        # Get list of all packages
-        local packages=$(yaml_get_array "agent/manifest.yaml" "packages" 2>/dev/null || echo "")
-        
-        # For each package, extract all file names
-        for pkg in $packages; do
-            # Try to get files from each section
-            local pkg_commands=$(yaml_get_array "agent/manifest.yaml" "packages.${pkg}.files.commands" 2>/dev/null || echo "")
-            local pkg_patterns=$(yaml_get_array "agent/manifest.yaml" "packages.${pkg}.files.patterns" 2>/dev/null || echo "")
-            local pkg_designs=$(yaml_get_array "agent/manifest.yaml" "packages.${pkg}.files.designs" 2>/dev/null || echo "")
-            
-            # Extract name field from each file entry
-            for i in $(seq 0 100); do
-                local cmd=$(yaml_get_nested "agent/manifest.yaml" "packages.${pkg}.files.commands[$i].name" 2>/dev/null)
-                [ -n "$cmd" ] && manifest_files="${manifest_files}${cmd}"$'\n'
-                
-                local pat=$(yaml_get_nested "agent/manifest.yaml" "packages.${pkg}.files.patterns[$i].name" 2>/dev/null)
-                [ -n "$pat" ] && manifest_files="${manifest_files}${pat}"$'\n'
-                
-                local des=$(yaml_get_nested "agent/manifest.yaml" "packages.${pkg}.files.designs[$i].name" 2>/dev/null)
-                [ -n "$des" ] && manifest_files="${manifest_files}${des}"$'\n'
-                
-                # Break if all are empty (no more files)
-                [ -z "$cmd" ] && [ -z "$pat" ] && [ -z "$des" ] && break
-            done
-        done
+        manifest_files=$(grep -E "^[[:space:]]+-[[:space:]]+name:" agent/manifest.yaml | sed 's/.*name:[[:space:]]*//' || echo "")
     fi
     
     # Check patterns directory
@@ -306,6 +283,7 @@ validate_namespace_consistency() {
     local namespace="$PACKAGE_NAME"
     local inconsistent=0
     local skipped=0
+    local skipped_package_files=0
     
     # Read package.yaml contents to know which files should be validated
     # Build list of filenames from contents (extract .name from each object)
@@ -336,6 +314,9 @@ validate_namespace_consistency() {
         done
     fi
     
+    # Track package files that were skipped (for helpful warning)
+    local skipped_package_files_list=""
+    
     # Check command files
     if [ -d "agent/commands" ]; then
         for file in agent/commands/*.md; do
@@ -349,6 +330,11 @@ validate_namespace_consistency() {
             
             # Check if file is in package.yaml contents
             if ! echo "$package_commands" | grep -q "^${basename}$"; then
+                # Check if this is a package file (matches namespace)
+                if [[ "$basename" =~ ^${namespace}\. ]]; then
+                    skipped_package_files_list="${skipped_package_files_list}${basename}"$'\n'
+                    skipped_package_files=$((skipped_package_files + 1))
+                fi
                 info "Skipping namespace check (not in package contents): $basename"
                 skipped=$((skipped + 1))
                 continue
@@ -374,6 +360,11 @@ validate_namespace_consistency() {
             
             # Check if file is in package.yaml contents
             if ! echo "$package_patterns" | grep -q "^${basename}$"; then
+                # Check if this is a package file (matches namespace)
+                if [[ "$basename" =~ ^${namespace}\. ]]; then
+                    skipped_package_files_list="${skipped_package_files_list}${basename}"$'\n'
+                    skipped_package_files=$((skipped_package_files + 1))
+                fi
                 info "Skipping namespace check (not in package contents): $basename"
                 skipped=$((skipped + 1))
                 continue
@@ -402,6 +393,11 @@ validate_namespace_consistency() {
             
             # Check if file is in package.yaml contents
             if ! echo "$package_designs" | grep -q "^${basename}$"; then
+                # Check if this is a package file (matches namespace)
+                if [[ "$basename" =~ ^${namespace}\. ]]; then
+                    skipped_package_files_list="${skipped_package_files_list}${basename}"$'\n'
+                    skipped_package_files=$((skipped_package_files + 1))
+                fi
                 info "Skipping namespace check (not in package contents): $basename"
                 skipped=$((skipped + 1))
                 continue
@@ -410,6 +406,21 @@ validate_namespace_consistency() {
     fi
     
     check
+    
+    # Error if package files match namespace but aren't in contents
+    if [ "$skipped_package_files" -gt 0 ]; then
+        echo ""
+        error "$skipped_package_files package file(s) match namespace but not in contents:"
+        echo "$skipped_package_files_list" | while read -r fname; do
+            [ -n "$fname" ] && echo "    ${RED}✗${NC} $fname"
+        done
+        echo ""
+        echo "  ${RED}Package files matching namespace MUST be in package.yaml contents${NC}"
+        echo "  Add them with: ${YELLOW}@acp.command-create${NC} or ${YELLOW}@acp.pattern-create${NC}"
+        echo "  Or remove the namespace prefix if they're dependencies"
+        inconsistent=$((inconsistent + skipped_package_files))
+    fi
+    
     if [ "$inconsistent" -eq 0 ]; then
         pass "All package content files use correct namespace"
         if [ "$skipped" -gt 0 ]; then

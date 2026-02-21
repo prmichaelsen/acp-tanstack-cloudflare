@@ -24,6 +24,3 @@ venv/
 # Build artifacts
 dist/
 build/
-
-# ACP local files
-agent/manifest.yaml
