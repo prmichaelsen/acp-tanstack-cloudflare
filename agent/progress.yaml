@@ -19,6 +19,19 @@ milestones:
     notes: |
       Converted patterns and created commands for TanStack Start + Cloudflare Workers
 
+  - id: M2
+    name: Expanded Patterns
+    status: completed
+    progress: 100%
+    started: 2026-02-28
+    completed: 2026-02-28
+    estimated_weeks: 1
+    tasks_completed: 3
+    tasks_total: 3
+    notes: |
+      Extracted 13 additional patterns from production agentbase.me-e1 project,
+      including migration patterns for Next.js to TanStack Start
+
 tasks:
   milestone_1:
     - id: task-1
@@ -66,10 +79,43 @@ tasks:
       notes: |
         Created 2 bug reports for ACP improvements (manifest system, progress.yaml for packages)
 
+  milestone_2:
+    - id: task-6
+      name: Extract Core Architecture Patterns
+      status: completed
+      file: null
+      estimated_hours: 4
+      completed_date: 2026-02-28
+      notes: |
+        Extracted 9 patterns from agentbase.me-e1: durable-objects-websocket, api-route-handlers,
+        auth-session-management, rate-limiting, zod-schema-validation, wrangler-configuration,
+        provider-adapter, acl-permissions, confirmation-tokens
+
+    - id: task-7
+      name: Create Migration Patterns
+      status: completed
+      file: null
+      estimated_hours: 3
+      completed_date: 2026-02-28
+      notes: |
+        Analyzed goodneighbor Next.js project and created 4 migration-focused patterns:
+        nextjs-to-tanstack-routing, scheduled-tasks, third-party-api-integration, email-service
+
+    - id: task-8
+      name: Update Package Config and README
+      status: completed
+      file: null
+      estimated_hours: 1
+      completed_date: 2026-02-28
+      notes: |
+        Updated package.yaml with 13 new pattern entries, reorganized README.md with
+        6 categories (Core Architecture, Cloudflare Infrastructure, Security & Auth,
+        Integrations, Advanced Patterns, Migration)
+
 documentation:
   design_documents: 0
   milestone_documents: 0
-  pattern_documents: 3
+  pattern_documents: 16
   task_documents: 0
   command_documents: 2
 
@@ -80,6 +126,15 @@ progress:
   overall: 100%
 
 recent_work:
+  - date: 2026-02-28
+    description: Expanded pattern library with 13 new patterns from production app
+    items:
+      - ✅ Extracted 9 core patterns from agentbase.me-e1
+      - ✅ Created 4 migration patterns for Next.js to TanStack Start
+      - ✅ Reorganized README.md with 6 pattern categories
+      - ✅ Updated package.yaml (now 16 patterns, 2 commands)
+      - ✅ Committed and pushed to origin/main (85b03b4)
+
   - date: 2026-02-21
     description: Completed core content milestone and ACP updates
     items:
@@ -90,26 +145,16 @@ recent_work:
       - ✅ Created comprehensive CHANGELOG entry
       - ✅ Committed changes (commits: ee388aa, 760411a, 408faf7)
       - ✅ Created 5 bug reports for ACP improvements
-      - ✅ Created progress.yaml for package tracking
-      - ✅ Updated ACP twice to get latest fixes
-      - ✅ Fixed package.yaml format to match official template
 
 next_steps:
-  - Push all changes to remote (git push)
-  - Wait for ACP bug fixes to be implemented
-  - Retry package validation when fixes are available
+  - Bump version to 1.2.0 for new pattern additions
   - Publish package with @acp.package-publish
 
 notes:
   - This is an ACP package repository for TanStack Start + Cloudflare Workers patterns
-  - Package contains 3 patterns and 2 commands
+  - Package contains 16 patterns and 2 commands across 6 categories
   - All files follow ACP conventions with tanstack-cloudflare namespace
-  - Created 5 bug reports for ACP maintainer:
-    - BR-001: Package manifest for dev dependencies
-    - BR-002: Progress.yaml for package repositories
-    - BR-003: package.yaml schema mismatch
-    - BR-004: manifest.yaml should track core commands
-    - BR-005: Installation test should run after publishing
-  - Package format is correct, waiting for ACP parser enhancements
+  - Patterns extracted from production agentbase.me-e1 project
+  - Migration patterns designed to help goodneighbor (Next.js) migrate to TanStack+Cloudflare
 
 current_blockers: []
