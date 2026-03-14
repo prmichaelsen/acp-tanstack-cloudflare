@@ -9,6 +9,7 @@
 **Created**: 2026-02-20
 **Last Updated**: 2026-02-21
 **Status**: Active
+**Scripts**: acp.package-create.sh, acp.common.sh, acp.yaml-parser.sh
 
 ---
 
@@ -36,6 +37,18 @@ Unlike the old version, this command:
 - ❌ Does NOT create example files (use templates instead)
 
 Use this command when starting a new ACP package that you plan to share with others.
+
+---
+
+## Auto-Initialization
+
+When creating packages in `~/.acp/projects/` for the first time, the system automatically initializes `~/.acp/` infrastructure:
+- Creates `~/.acp/` directory
+- Installs full ACP (templates, scripts, schemas)
+- Creates `~/.acp/projects/` directory
+- Creates `~/.acp/agent/manifest.yaml` for package tracking
+
+This happens automatically - no manual setup required.
 
 ---
 

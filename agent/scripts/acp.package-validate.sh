@@ -172,13 +172,49 @@ validate_file_existence() {
         done
     fi
     
+    # Check indices (key file index files in agent/index/)
+    if yaml_has_key "package.yaml" "contents.indices"; then
+        local indices_count=$(yaml_get_array "package.yaml" "contents.indices")
+        for i in $(seq 0 $((indices_count - 1))); do
+            local index_name=$(yaml_get_nested "package.yaml" "contents.indices[$i].name")
+            if [ -n "$index_name" ]; then
+                total_files=$((total_files + 1))
+                check
+                if [ -f "agent/index/$index_name" ]; then
+                    pass "agent/index/$index_name ✓"
+                else
+                    error "Missing file: agent/index/$index_name"
+                    missing_files=$((missing_files + 1))
+                fi
+            fi
+        done
+    fi
+
+    # Check files (template source files in agent/files/)
+    if yaml_has_key "package.yaml" "contents.files"; then
+        local files_count=$(yaml_get_array "package.yaml" "contents.files")
+        for i in $(seq 0 $((files_count - 1))); do
+            local file_name=$(yaml_get_nested "package.yaml" "contents.files[$i].name")
+            if [ -n "$file_name" ]; then
+                total_files=$((total_files + 1))
+                check
+                if [ -f "agent/files/$file_name" ]; then
+                    pass "agent/files/$file_name ✓"
+                else
+                    error "Missing file: agent/files/$file_name"
+                    missing_files=$((missing_files + 1))
+                fi
+            fi
+        done
+    fi
+
     if [ "$missing_files" -eq 0 ]; then
         pass "All $total_files files in contents exist"
     else
         error "$missing_files of $total_files files missing"
         fixable "Remove missing files from package.yaml"
     fi
-    
+
     echo ""
 }
 
@@ -261,6 +297,31 @@ check_unlisted_files() {
             if ! grep -q "name: $basename" package.yaml 2>/dev/null; then
                 warning "Found unlisted file: design/$basename"
                 fixable "Add design/$basename to package.yaml"
+                unlisted=$((unlisted + 1))
+            fi
+        done
+    fi
+    
+    # Check scripts directory
+    if [ -d "agent/scripts" ]; then
+        for file in agent/scripts/*.sh; do
+            [ -f "$file" ] || continue
+            local basename=$(basename "$file")
+            
+            # Skip templates, acp core scripts, and common utilities
+            [[ "$basename" == *.template.sh ]] && continue
+            [[ "$basename" == acp.* ]] && continue
+            [[ "$basename" == "acp.common.sh" ]] && continue
+            
+            # Skip if in manifest (installed from another package)
+            if echo "$manifest_files" | grep -q "^${basename}$"; then
+                continue
+            fi
+            
+            # Check if listed in package.yaml
+            if ! grep -q "name: $basename" package.yaml 2>/dev/null; then
+                warning "Found unlisted file: scripts/$basename"
+                fixable "Add scripts/$basename to package.yaml"
                 unlisted=$((unlisted + 1))
             fi
         done
@@ -605,10 +666,15 @@ generate_report() {
     echo "Errors: ${#ERRORS[@]}"
     echo ""
     
-    # Calculate score
+    # Calculate score (clean checks / total * 100)
+    # Clean checks = checks that passed without errors or warnings
     local score=0
     if [ "$TOTAL_CHECKS" -gt 0 ]; then
-        score=$((PASSED_CHECKS * 100 / TOTAL_CHECKS))
+        local clean_checks=$((TOTAL_CHECKS - ${#ERRORS[@]} - ${#WARNINGS[@]}))
+        if [ "$clean_checks" -lt 0 ]; then
+            clean_checks=0
+        fi
+        score=$((clean_checks * 100 / TOTAL_CHECKS))
     fi
     
     # Determine status
@@ -676,6 +742,220 @@ display_fixable_issues() {
     fi
 }
 
+# Validate experimental feature consistency
+validate_experimental_consistency() {
+    echo ""
+    echo "${BOLD}Experimental Features${NC}"
+    
+    local errors=0
+    local checked=0
+    
+    # Check each content type
+    for type in commands patterns designs scripts; do
+        # Determine directory path
+        local dir_path
+        case "$type" in
+            designs)
+                dir_path="agent/design"
+                ;;
+            *)
+                dir_path="agent/${type}"
+                ;;
+        esac
+        
+        # Skip if directory doesn't exist
+        if [ ! -d "$dir_path" ]; then
+            continue
+        fi
+        
+        # Get all .md or .sh files in directory
+        local files
+        if [ "$type" = "scripts" ]; then
+            files=$(find "$dir_path" -maxdepth 1 -name "*.sh" -type f 2>/dev/null | xargs -r basename -a)
+        else
+            files=$(find "$dir_path" -maxdepth 1 -name "*.md" -type f 2>/dev/null | xargs -r basename -a)
+        fi
+        
+        # Check each file
+        for file_name in $files; do
+            if [ -z "$file_name" ]; then
+                continue
+            fi
+            
+            local file_path="${dir_path}/${file_name}"
+            
+            # Check if file is in package.yaml contents
+            local in_contents=$(grep -A 1000 "^  ${type}:" package.yaml 2>/dev/null | grep -A 1 "name: ${file_name}" | head -1)
+            if [ -z "$in_contents" ]; then
+                continue  # File not in package.yaml, skip
+            fi
+            
+            # Check if marked experimental in package.yaml (exclude comments)
+            local is_experimental=$(grep -A 1000 "^  ${type}:" package.yaml 2>/dev/null | grep -A 2 "name: ${file_name}" | grep "^ *experimental: true" | grep -v "^[[:space:]]*#" | head -1)
+            
+            # Check if file has Status: Experimental
+            local has_experimental_status=$(grep "^\*\*Status\*\*: Experimental" "$file_path" 2>/dev/null)
+            
+            if [ -n "$is_experimental" ]; then
+                # Marked experimental in package.yaml
+                checked=$((checked + 1))
+                check
+                if [ -z "$has_experimental_status" ]; then
+                    error "${file_path}: Marked experimental in package.yaml but missing 'Status: Experimental' in file"
+                    fixable "Add '**Status**: Experimental' to ${file_path}"
+                    errors=$((errors + 1))
+                else
+                    pass "${file_name}: Experimental marking consistent"
+                fi
+            elif [ -n "$has_experimental_status" ]; then
+                # Has Status: Experimental but not marked in package.yaml
+                checked=$((checked + 1))
+                check
+                error "${file_path}: Has 'Status: Experimental' but not marked in package.yaml"
+                fixable "Add 'experimental: true' to ${file_name} in package.yaml"
+                errors=$((errors + 1))
+            fi
+        done
+    done
+    
+    if [ $checked -eq 0 ]; then
+        check
+        pass "No experimental features to validate"
+    elif [ $errors -eq 0 ] && [ $checked -gt 0 ]; then
+        pass "All experimental features marked consistently"
+    fi
+    
+    echo ""
+    
+    return $errors
+}
+
+# Validate script-command bindings
+validate_script_dependencies() {
+    echo ""
+    echo "${BOLD}Script-Command Bindings${NC}"
+    
+    local validation_errors=0
+    
+    # Get all commands from package.yaml using numeric index iteration
+    local cmd_count=0
+    local cmd_index=0
+    while true; do
+        local cmd=$(yaml_query ".contents.commands[$cmd_index].name" 2>/dev/null || echo "")
+        if [ -z "$cmd" ] || [ "$cmd" = "null" ]; then
+            break
+        fi
+
+        cmd_count=$((cmd_count + 1))
+        local cmd_file="agent/commands/$cmd"
+
+        if [ ! -f "$cmd_file" ]; then
+            cmd_index=$((cmd_index + 1))
+            continue  # File existence checked elsewhere
+        fi
+
+        # Get scripts from frontmatter
+        local frontmatter_line=$(grep "^\*\*Scripts\*\*:" "$cmd_file" 2>/dev/null || echo "")
+
+        if [ -z "$frontmatter_line" ]; then
+            check
+            error "$cmd: Missing **Scripts**: field in frontmatter"
+            fixable "Add **Scripts**: field to $cmd_file frontmatter"
+            validation_errors=$((validation_errors + 1))
+            cmd_index=$((cmd_index + 1))
+            continue
+        fi
+
+        local frontmatter_scripts=$(echo "$frontmatter_line" | awk -F': ' '{print $2}' | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | grep -v "^$" | sort)
+
+        # Handle "None" case
+        if echo "$frontmatter_scripts" | grep -qi "^None$"; then
+            frontmatter_scripts=""
+        fi
+
+        # Get scripts from package.yaml using numeric index iteration
+        local yaml_scripts=""
+        local si=0
+        while true; do
+            local s=$(yaml_query ".contents.commands[$cmd_index].scripts[$si]" 2>/dev/null || echo "")
+            if [ -z "$s" ] || [ "$s" = "null" ]; then
+                break
+            fi
+            if [ -n "$yaml_scripts" ]; then
+                yaml_scripts="$yaml_scripts
+$s"
+            else
+                yaml_scripts="$s"
+            fi
+            si=$((si + 1))
+        done
+        yaml_scripts=$(echo "$yaml_scripts" | sort)
+
+        # Compare (both should be empty or both should match)
+        if [ "$frontmatter_scripts" != "$yaml_scripts" ]; then
+            check
+            error "$cmd: Scripts mismatch between frontmatter and package.yaml"
+            echo "     ${DIM}Frontmatter: $(echo "$frontmatter_scripts" | tr '\n' ', ' | sed 's/, $//')${NC}"
+            echo "     ${DIM}package.yaml: $(echo "$yaml_scripts" | tr '\n' ', ' | sed 's/, $//')${NC}"
+            fixable "Update $cmd to have matching scripts in both locations"
+            validation_errors=$((validation_errors + 1))
+            cmd_index=$((cmd_index + 1))
+            continue
+        fi
+
+        # Verify all scripts exist in scripts section
+        local script_errors=0
+        while IFS= read -r script; do
+            if [ -n "$script" ]; then
+                # Search for script in contents.scripts by numeric index
+                local script_found=false
+                local sci=0
+                while true; do
+                    local s_name=$(yaml_query ".contents.scripts[$sci].name" 2>/dev/null || echo "")
+                    if [ -z "$s_name" ] || [ "$s_name" = "null" ]; then
+                        break
+                    fi
+                    if [ "$s_name" = "$script" ]; then
+                        script_found=true
+                        break
+                    fi
+                    sci=$((sci + 1))
+                done
+
+                if [ "$script_found" = false ]; then
+                    if [ $script_errors -eq 0 ]; then
+                        check
+                        error "$cmd: Declares scripts not in scripts section"
+                    fi
+                    echo "     ${DIM}Missing: $script${NC}"
+                    fixable "Add $script to contents.scripts section in package.yaml"
+                    script_errors=$((script_errors + 1))
+                fi
+            fi
+        done <<< "$frontmatter_scripts"
+
+        if [ $script_errors -gt 0 ]; then
+            validation_errors=$((validation_errors + 1))
+        else
+            check
+            local script_count=$(echo "$frontmatter_scripts" | grep -v "^$" | wc -l)
+            if [ "$script_count" -eq 0 ]; then
+                pass "$cmd: No script dependencies"
+            else
+                pass "$cmd: Scripts consistent ($script_count script(s))"
+            fi
+        fi
+
+        cmd_index=$((cmd_index + 1))
+    done
+
+    if [ $cmd_count -eq 0 ]; then
+        pass "No commands to validate"
+    fi
+    
+    return $validation_errors
+}
+
 # Main validation function
 main() {
     echo "${BLUE}🔍 ACP Package Validation${NC}"
@@ -690,6 +970,8 @@ main() {
     validate_file_existence
     check_unlisted_files
     validate_namespace_consistency
+    validate_script_dependencies
+    validate_experimental_consistency
     validate_git_repository
     validate_readme
     

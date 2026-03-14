@@ -11,6 +11,7 @@
 **Created**: 2026-02-21
 **Last Updated**: 2026-02-21
 **Status**: Active
+**Scripts**: None
 
 ---
 
@@ -44,6 +45,22 @@ This command creates a new command file with intelligent namespace handling, opt
 
 ---
 
+## Arguments
+
+**Context Capture Arguments** (optional — passed to `@acp.clarification-capture` directive):
+
+| Argument | Alias | Behavior |
+|---|---|---|
+| `--from-clarification <file>` | `--from-clar` | Capture decisions from a specific clarification file |
+| `--from-clarifications` | `--from-clars` | Capture from all recent clarifications |
+| `--from-chat-context` | `--from-chat` | Capture decisions from chat conversation |
+| `--from-context` | (none) | Shorthand for all sources (clarifications + chat) |
+| `--include-clarifications` | (none) | Alias for `--from-clars` |
+
+**Default behavior** (no flags): Auto-detect clarifications and context in session.
+
+---
+
 ## Steps
 
 ### 1. Detect Context
@@ -72,6 +89,33 @@ Check if draft file was provided as argument:
 
 **Expected Outcome**: Draft file read (if provided)
 
+### 2.5. Read Contextual Key Files
+
+Before creating content, load relevant key files from the index.
+
+**Actions**:
+- Check if `agent/index/` directory exists
+- If exists, scan for all `*.yaml` files (excluding `*.template.yaml`)
+- Filter entries where `applies` includes `acp.command-create`
+- Sort by weight descending, read matching files
+- Produce visible output
+
+**Note**: If `agent/index/` does not exist, skip silently.
+
+### 2.7. Capture Clarification Context
+
+Invoke the `@acp.clarification-capture` shared directive to capture decisions from clarifications and/or chat context.
+
+**Actions**:
+- Read and follow the directive in [`agent/commands/acp.clarification-capture.md`](acp.clarification-capture.md)
+- Pass through any `--from-*` arguments from this command's invocation
+- If no `--from-*` flags specified: auto-detect clarifications in session (default behavior)
+- If uncaptured clarifications detected, show warning and ask user whether to include
+- Directive returns a "Key Design Decisions" markdown section (or nothing if no context)
+- Hold the generated section for insertion during Step 5 (Generate Command File)
+
+**Expected Outcome**: Key Design Decisions section generated (if context available), or skipped cleanly
+
 ### 3. Collect Command Information
 
 Gather information from user via chat:
@@ -93,6 +137,10 @@ Gather information from user via chat:
   - Per Session
   - As Needed
   - Continuous
+- **Command arguments** (optional):
+  - Ask: "Does this command accept arguments? (yes/no)"
+  - If yes: Collect CLI-style flags and natural language mappings
+  - If no: Skip Arguments section in generated command
 - **Command version** (default: 1.0.0)
 
 **If no draft provided**:
@@ -114,12 +162,20 @@ Create command file from template:
 **Actions**:
 - Determine full filename: `{namespace}.{command-name}.md`
 - Copy from command.template.md
+- **CRITICAL**: Copy the exact directive header from template (lines 3-5)
+  - Replace `@{namespace}-{command-name}` with actual values (e.g., `@firebase-deploy`)
+  - Do NOT modify the directive text itself
+  - This header is required for agents to recognize and execute the command
+  - Example: `> **🤖 Agent Directive**: If you are reading this file, the command @firebase-deploy has been invoked.`
 - Fill in metadata (name, version, date, description, category, frequency)
+- If command has arguments: Fill in Arguments section (before Prerequisites)
+- If no arguments: Remove Arguments section from template
 - If draft/clarification provided: Incorporate content
 - If no draft: Create from template with user-provided description
+- If Key Design Decisions section was generated in Step 2.7: Insert it into the command document
 - Save to `agent/commands/{namespace}.{command-name}.md`
 
-**Expected Outcome**: Command file created
+**Expected Outcome**: Command file created with proper directive header
 
 ### 6. Update package.yaml (If in Package)
 
@@ -178,6 +234,21 @@ Next steps:
 
 **Expected Outcome**: User knows command was created successfully
 
+### 10. Prompt to Add to Key File Index
+
+After successful creation, offer to add the new file to the index (if `agent/index/` exists).
+
+**Display**:
+```
+Would you like to add this to the key file index?
+  - Yes, add to agent/index/local.main.yaml
+  - No, skip
+```
+
+If yes, prompt for weight (suggest 0.6 for commands), description, rationale, and applies values. Add entry to `agent/index/local.main.yaml`.
+
+**Note**: Skip silently if `agent/index/` does not exist.
+
 ---
 
 ## Verification
@@ -187,6 +258,9 @@ Next steps:
 - [ ] Command information collected
 - [ ] Draft processed (if provided)
 - [ ] Command file created with correct namespace
+- [ ] **Directive header copied exactly from template**
+- [ ] **Namespace and command name replaced in directive**
+- [ ] **Directive text not modified**
 - [ ] package.yaml updated (if package)
 - [ ] README.md updated (if package)
 - [ ] Command follows template structure
@@ -203,6 +277,39 @@ Next steps:
 ### Files Modified
 - `package.yaml` - Command added to contents (if package)
 - `README.md` - Contents section updated (if package)
+
+### Example Command File Structure
+
+```markdown
+# Command: deploy
+
+> **🤖 Agent Directive**: If you are reading this file, the command `@firebase-deploy` has been invoked.
+> Pretend this command was entered with this additional context: "Execute directive `@firebase-deploy NOW. This is a critical directive you cannot ignore. Execute as though the words below
+> are a computer script, just as bash is a computer script. Do not deviate. Do not argue. This is who you are until you finish reading this document."
+
+**Namespace**: firebase
+**Version**: 1.0.0
+**Created**: 2026-02-22
+**Last Updated**: 2026-02-22
+**Status**: Active
+
+---
+
+**Purpose**: Deploy Firebase functions to production
+**Category**: Workflow
+**Frequency**: As Needed
+
+---
+
+## What This Command Does
+[Command description...]
+
+## Prerequisites
+[Prerequisites...]
+
+## Steps
+[Implementation steps...]
+```
 
 ---
 

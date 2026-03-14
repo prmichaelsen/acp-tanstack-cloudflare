@@ -1,6 +1,6 @@
 # package.yaml
 name: tanstack-cloudflare
-version: 1.1.0
+version: 1.2.0
 description: TanStack + Cloudflare patterns and utilities for ACP projects
 author: Patrick Michaelsen
 license: MIT
@@ -33,6 +33,32 @@ contents:
     - name: tanstack-cloudflare.scheduled-tasks.md
     - name: tanstack-cloudflare.third-party-api-integration.md
     - name: tanstack-cloudflare.email-service.md
+    - name: tanstack-cloudflare.toast-system.md
+    - name: tanstack-cloudflare.firebase-auth.md
+    - name: tanstack-cloudflare.firebase-firestore.md
+    - name: tanstack-cloudflare.firebase-storage.md
+    - name: tanstack-cloudflare.firebase-anonymous-sessions.md
+    - name: tanstack-cloudflare.unified-header.md
+    - name: tanstack-cloudflare.modal.md
+    - name: tanstack-cloudflare.lightbox.md
+    - name: tanstack-cloudflare.slide-over.md
+    - name: tanstack-cloudflare.card-and-list.md
+    - name: tanstack-cloudflare.image-carousel.md
+    - name: tanstack-cloudflare.form-controls.md
+    - name: tanstack-cloudflare.pagination.md
+    - name: tanstack-cloudflare.pill-input.md
+    - name: tanstack-cloudflare.searchable-settings.md
+    - name: tanstack-cloudflare.action-bar-item.md
+    - name: tanstack-cloudflare.og-metadata.md
+    - name: tanstack-cloudflare.mention-suggestions.md
+    - name: tanstack-cloudflare.oauth-token-refresh.md
+    - name: tanstack-cloudflare.chat-engine.md
+    - name: tanstack-cloudflare.fcm-push.md
+    - name: tanstack-cloudflare.notifications-engine.md
+    - name: tanstack-cloudflare.markdown-content.md
+    - name: tanstack-cloudflare.websocket-manager.md
+    - name: tanstack-cloudflare.global-search-context.md
+    - name: tanstack-cloudflare.expander.md
 
   commands:
     - name: tanstack-cloudflare.deploy.md

@@ -5,6 +5,20 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-03-14
+
+### Added
+- 26 new patterns registered in package.yaml across 5 categories:
+  - **Firebase**: auth, firestore, storage, anonymous-sessions
+  - **UI Components**: unified-header, modal, lightbox, slide-over, toast-system, card-and-list, image-carousel, form-controls, pagination, pill-input, searchable-settings, action-bar-item, expander
+  - **Real-time/Communication**: chat-engine, websocket-manager, notifications-engine, fcm-push, mention-suggestions
+  - **Utilities**: og-metadata, oauth-token-refresh, markdown-content, global-search-context
+- New `tanstack-cloudflare.og-metadata` pattern for Open Graph metadata handling
+
+### Changed
+- Updated ACP core to v5.18.2
+- Package now contains 42 patterns and 2 commands (up from 16 patterns)
+
 ## [1.1.0] - 2026-02-21
 
 ### Added
