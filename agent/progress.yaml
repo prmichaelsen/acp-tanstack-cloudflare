@@ -32,6 +32,22 @@ milestones:
       Extracted 13 additional patterns from production agentbase.me-e1 project,
       including migration patterns for Next.js to TanStack Start
 
+  - id: M3
+    name: Starter Template Files
+    status: not_started
+    progress: 0%
+    started: null
+    completed: null
+    estimated_weeks: 2
+    tasks_completed: 0
+    tasks_total: 7
+    file: agent/milestones/milestone-3-starter-templates.md
+    notes: |
+      Ship production-tested starter template source files via agent/files/.
+      ~35 generalized files extracted from cleanbook-tanstack across 6 bundles:
+      UI primitives, data display, layout shell, wizard, Firebase auth, notifications/media.
+      5 net-new pattern docs. Targets package v2.0.0.
+
 tasks:
   milestone_1:
     - id: task-1
@@ -112,20 +128,105 @@ tasks:
         6 categories (Core Architecture, Cloudflare Infrastructure, Security & Auth,
         Integrations, Advanced Patterns, Migration)
 
+  milestone_3:
+    - id: task-9
+      name: Extract UI Primitives Bundle
+      status: not_started
+      file: agent/tasks/milestone-3-starter-templates/task-9-ui-primitives-bundle.md
+      estimated_hours: 3
+      started: null
+      actual_hours: null
+      notes: |
+        Modal, SlideOverPanel, PillInput, Typeahead, SearchBar — 5 zero-domain-coupling components
+
+    - id: task-10
+      name: Extract Data Display Bundle
+      status: not_started
+      file: agent/tasks/milestone-3-starter-templates/task-10-data-display-bundle.md
+      estimated_hours: 4
+      started: null
+      actual_hours: null
+      notes: |
+        SortableTable, MobileCardList, useSortableData, ColumnFilter, SortIndicator,
+        EntityTable, Paginator, PaginationToggle, PaginationSlideOver — 9 files
+
+    - id: task-11
+      name: Extract Layout Shell + Wizard Bundle
+      status: not_started
+      file: agent/tasks/milestone-3-starter-templates/task-11-layout-and-wizard-bundle.md
+      estimated_hours: 3
+      started: null
+      actual_hours: null
+      notes: |
+        UnifiedHeader, UnifiedFooter, Sidebar, MobileBottomNav, MenuDropdown,
+        WizardShell, useWizardState — 7 files with {{APP_NAME}}, {{PRIMARY_COLOR}} variables
+
+    - id: task-12
+      name: Extract Firebase Auth Bundle
+      status: not_started
+      file: agent/tasks/milestone-3-starter-templates/task-12-auth-bundle.md
+      estimated_hours: 3
+      started: null
+      actual_hours: null
+      notes: |
+        AuthContext, AuthForm, login/logout/session API routes — complete Firebase auth flow
+
+    - id: task-13
+      name: Extract Notifications, Media, and Infrastructure Bundle
+      status: not_started
+      file: agent/tasks/milestone-3-starter-templates/task-13-notifications-and-media-bundle.md
+      estimated_hours: 4
+      started: null
+      actual_hours: null
+      notes: |
+        Notification DO + WS route + bell + panel + hook, PhotoGallery, PhotoUpload,
+        upload-manager DO, TOS consent, settings route, router, GlobalSearchContext, useActionToast
+
+    - id: task-14
+      name: Create New Pattern Documents
+      status: not_started
+      file: agent/tasks/milestone-3-starter-templates/task-14-new-pattern-docs.md
+      estimated_hours: 3
+      started: null
+      actual_hours: null
+      notes: |
+        5 net-new patterns: wizard-system, typeahead, signed-url-upload, tos-consent, mobile-bottom-nav
+
+    - id: task-15
+      name: Update Package Config, README, and Version
+      status: not_started
+      file: agent/tasks/milestone-3-starter-templates/task-15-package-config-and-readme.md
+      estimated_hours: 2
+      started: null
+      actual_hours: null
+      notes: |
+        Finalize contents.files in package.yaml, update README with template docs,
+        bump to v2.0.0, update CHANGELOG
+
 documentation:
-  design_documents: 0
-  milestone_documents: 0
-  pattern_documents: 16
-  task_documents: 0
+  design_documents: 1
+  milestone_documents: 1
+  pattern_documents: 43
+  task_documents: 7
   command_documents: 2
 
 progress:
   planning: 100%
-  implementation: 100%
-  documentation: 100%
-  overall: 100%
+  implementation: 60%
+  documentation: 80%
+  overall: 70%
 
 recent_work:
+  - date: 2026-03-15
+    description: Planned M3 Starter Template Files — audit + design + milestone + 7 tasks
+    items:
+      - ✅ Audited cleanbook-tanstack (422 files) for extractable UX components
+      - ✅ Created audit report (agent/reports/audit-1-cleanbook-extractable-ux-components.md)
+      - ✅ Created design document (agent/design/starter-templates-design.md)
+      - ✅ Created M3 milestone (agent/milestones/milestone-3-starter-templates.md)
+      - ✅ Created 7 task documents (tasks 9-15)
+      - ✅ Updated progress.yaml with M3, corrected doc counts (43 patterns, not 16)
+
   - date: 2026-02-28
     description: Expanded pattern library with 13 new patterns from production app
     items:
@@ -147,14 +248,17 @@ recent_work:
       - ✅ Created 5 bug reports for ACP improvements
 
 next_steps:
-  - Bump version to 1.2.0 for new pattern additions
-  - Publish package with @acp.package-publish
+  - Start M3 task-9 (UI Primitives Bundle) — extract Modal, SlideOverPanel, PillInput, Typeahead, SearchBar
+  - Tasks 9-13 can be parallelized (independent file bundles)
+  - Task 14 (new pattern docs) depends on tasks 9-13
+  - Task 15 (package config) depends on all prior tasks
 
 notes:
   - This is an ACP package repository for TanStack Start + Cloudflare Workers patterns
-  - Package contains 16 patterns and 2 commands across 6 categories
-  - All files follow ACP conventions with tanstack-cloudflare namespace
-  - Patterns extracted from production agentbase.me-e1 project
-  - Migration patterns designed to help goodneighbor (Next.js) migrate to TanStack+Cloudflare
+  - Package currently ships 43 patterns and 2 commands (documentation only)
+  - M3 adds ~35 starter template source files via agent/files/ convention
+  - Template files extracted from production cleanbook-tanstack project
+  - Uses ACP contents.files with variable substitution (APP_NAME, PRIMARY_COLOR, AUTH_REDIRECT)
+  - Target version 2.0.0 (new content type = semver major)
 
 current_blockers: []
