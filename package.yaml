@@ -1,6 +1,6 @@
 # package.yaml
 name: tanstack-cloudflare
-version: 1.2.0
+version: 1.3.0
 description: TanStack + Cloudflare patterns and utilities for ACP projects
 author: Patrick Michaelsen
 license: MIT
@@ -59,6 +59,7 @@ contents:
     - name: tanstack-cloudflare.websocket-manager.md
     - name: tanstack-cloudflare.global-search-context.md
     - name: tanstack-cloudflare.expander.md
+    - name: tanstack-cloudflare.sortable-filterable-tables.md
 
   commands:
     - name: tanstack-cloudflare.deploy.md
