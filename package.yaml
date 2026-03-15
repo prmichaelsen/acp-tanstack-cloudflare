@@ -1,7 +1,7 @@
 # package.yaml
 name: tanstack-cloudflare
-version: 1.3.0
-description: TanStack + Cloudflare patterns and utilities for ACP projects
+version: 2.0.0
+description: TanStack + Cloudflare patterns, commands, and starter template files for ACP projects
 author: Patrick Michaelsen
 license: MIT
 homepage: https://github.com/prmichaelsen/acp-tanstack-cloudflare
@@ -12,9 +12,6 @@ release:
   branch: main
 
 # Package contents
-# Add files here as you create them
-# Use @acp.pattern-create, @acp.command-create, @acp.design-create
-# These commands automatically update this section
 contents:
   patterns:
     - name: tanstack-cloudflare.library-services.md
@@ -60,6 +57,12 @@ contents:
     - name: tanstack-cloudflare.global-search-context.md
     - name: tanstack-cloudflare.expander.md
     - name: tanstack-cloudflare.sortable-filterable-tables.md
+    # New patterns (M3)
+    - name: tanstack-cloudflare.wizard-system.md
+    - name: tanstack-cloudflare.typeahead.md
+    - name: tanstack-cloudflare.signed-url-upload.md
+    - name: tanstack-cloudflare.tos-consent.md
+    - name: tanstack-cloudflare.mobile-bottom-nav.md
 
   commands:
     - name: tanstack-cloudflare.deploy.md
@@ -67,9 +70,236 @@ contents:
 
   designs: []
 
+  files:
+    # === UI Primitives ===
+    - name: src/components/ui/Modal.tsx
+      description: Portal-based modal with ConfirmationModal variants (ESC dismiss, body scroll lock, persistent mode)
+      target: src/components/ui/
+      required: false
+
+    - name: src/components/ui/SlideOverPanel.tsx
+      description: Animated right-side slide-over panel with backdrop overlay and mount/unmount transitions
+      target: src/components/ui/
+      required: false
+
+    - name: src/components/ui/PillInput.tsx
+      description: Multi-select pill/tag input with fuzzy search (fuse.js), keyboard navigation, custom values
+      target: src/components/ui/
+      required: false
+
+    - name: src/components/ui/Typeahead.tsx
+      description: Multi-select combobox with search input, fixed-position dropdown, selected pills display
+      target: src/components/ui/
+      required: false
+
+    - name: src/components/ui/SearchBar.tsx
+      description: Controlled search input with clear button, backed by GlobalSearchContext
+      target: src/components/ui/
+      required: false
+
+    # === Data Display ===
+    - name: src/components/data/SortableTable.tsx
+      description: Generic sortable table with column config, sort icons, and per-column filter modals
+      target: src/components/data/
+      required: false
+
+    - name: src/components/data/MobileCardList.tsx
+      description: Mobile card companion to SortableTable with sort/filter toolbar, shared ColumnConfig
+      target: src/components/data/
+      required: false
+
+    - name: src/components/data/useSortableData.ts
+      description: React hook for sort state and filter modal state management on tabular data
+      target: src/components/data/
+      required: false
+
+    - name: src/components/data/ColumnFilter.tsx
+      description: Inline column filter dropdown with distinct value enumeration
+      target: src/components/data/
+      required: false
+
+    - name: src/components/data/SortIndicator.tsx
+      description: Sort direction arrow indicator component
+      target: src/components/data/
+      required: false
+
+    - name: src/components/data/EntityTable.tsx
+      description: Responsive table+card with Fuse.js search, config-driven columns, avatar support, row actions
+      target: src/components/data/
+      required: false
+
+    - name: src/components/data/Paginator.tsx
+      description: Full pagination bar with first/prev/next/last, page numbers, inline page editing
+      target: src/components/data/
+      required: false
+
+    - name: src/components/data/PaginationToggle.tsx
+      description: Toggle between pages and infinite scroll modes with page size selector
+      target: src/components/data/
+      required: false
+
+    - name: src/components/data/PaginationSlideOver.tsx
+      description: Slide-over panel composing PaginationToggle and Paginator controls
+      target: src/components/data/
+      required: false
+
+    # === Layout ===
+    - name: src/components/layout/UnifiedHeader.tsx
+      description: Fixed top header with back navigation, brand name, notification slot, and menu dropdown
+      target: src/components/layout/
+      required: false
+      variables:
+        - name: APP_NAME
+          description: Application brand name shown in header
+          default: My App
+
+    - name: src/components/layout/UnifiedFooter.tsx
+      description: Fixed bottom footer bar with safe-area-inset padding for mobile
+      target: src/components/layout/
+      required: false
+
+    - name: src/components/layout/Sidebar.tsx
+      description: Responsive sidebar navigation with mobile overlay, config-driven NavItem array
+      target: src/components/layout/
+      required: false
+
+    - name: src/components/layout/MobileBottomNav.tsx
+      description: Fixed bottom navigation bar for mobile with config-driven icon+label items
+      target: src/components/layout/
+      required: false
+
+    - name: src/components/layout/MenuDropdown.tsx
+      description: Full-width dropdown menu from header with configurable items and logout callback
+      target: src/components/layout/
+      required: false
+
+    # === Wizard ===
+    - name: src/components/wizard/WizardShell.tsx
+      description: Multi-step wizard layout with progress bar, step dots, back/next navigation
+      target: src/components/wizard/
+      required: false
+      variables:
+        - name: PRIMARY_COLOR
+          description: Primary brand color for wizard progress bar gradient
+          default: "#3B82F6"
+
+    - name: src/hooks/useWizardState.ts
+      description: URL-synced multi-step wizard state hook with sessionStorage persistence and typed form data
+      target: src/hooks/
+      required: false
+
+    # === Auth (Firebase) ===
+    - name: src/components/auth/AuthContext.tsx
+      description: Firebase auth React context with onAuthStateChanged listener and session cookie sync
+      target: src/components/auth/
+      required: false
+
+    - name: src/components/auth/AuthForm.tsx
+      description: Multi-mode login/signup/forgot-password form with Firebase auth error mapping
+      target: src/components/auth/
+      required: false
+      variables:
+        - name: APP_NAME
+          description: Application name shown in auth form header
+          default: My App
+        - name: AUTH_REDIRECT
+          description: Path to redirect to after successful login
+          default: /home
+
+    - name: src/routes/api/auth/login.tsx
+      description: Firebase session cookie login endpoint (POST with ID token verification)
+      target: src/routes/api/auth/
+      required: false
+
+    - name: src/routes/api/auth/logout.tsx
+      description: Session cookie clear endpoint
+      target: src/routes/api/auth/
+      required: false
+
+    - name: src/routes/api/auth/session.tsx
+      description: Session check endpoint returning auth state
+      target: src/routes/api/auth/
+      required: false
+
+    # === Notifications ===
+    - name: src/components/notifications/NotificationBell.tsx
+      description: Bell icon with unread badge count and dropdown panel toggle
+      target: src/components/notifications/
+      required: false
+
+    - name: src/components/notifications/NotificationPanel.tsx
+      description: Dropdown notification list with mark-read, delete, time-ago, injectable icon mapping
+      target: src/components/notifications/
+      required: false
+
+    - name: src/hooks/useNotifications.ts
+      description: WebSocket real-time + REST notification hook with optimistic updates
+      target: src/hooks/
+      required: false
+
+    - name: src/durable-objects/notification-hub.ts
+      description: Per-user WebSocket broadcast Durable Object for real-time notifications
+      target: src/durable-objects/
+      required: false
+
+    - name: src/routes/api/notifications-ws.tsx
+      description: Authenticated WebSocket upgrade proxy route to notification hub DO
+      target: src/routes/api/
+      required: false
+
+    # === Media ===
+    - name: src/components/media/PhotoGallery.tsx
+      description: Grid gallery with lightbox modal, prev/next navigation, generic MediaItem interface
+      target: src/components/media/
+      required: false
+
+    - name: src/components/media/PhotoUpload.tsx
+      description: Signed-URL upload with XHR progress tracking, retry, camera capture, configurable MIME types
+      target: src/components/media/
+      required: false
+
+    - name: src/durable-objects/upload-manager.ts
+      description: Chunked upload Durable Object with progress tracking and storage relay
+      target: src/durable-objects/
+      required: false
+
+    # === Infrastructure ===
+    - name: src/contexts/GlobalSearchContext.tsx
+      description: Keyed pub/sub global search state context with cross-component subscriptions
+      target: src/contexts/
+      required: false
+
+    - name: src/hooks/useActionToast.ts
+      description: withToast() wrapper for async actions with automatic success/error toast display
+      target: src/hooks/
+      required: false
+
+    - name: src/routes/api/consent/tos.tsx
+      description: Versioned TOS consent tracking with GET check and POST accept with IP logging
+      target: src/routes/api/consent/
+      required: false
+      variables:
+        - name: AUTH_REDIRECT
+          description: Redirect path for unauthenticated users
+          default: /login
+
+    - name: src/routes/settings.tsx
+      description: Protected layout route with auth guard redirect and Outlet for nested routes
+      target: src/routes/
+      required: false
+      variables:
+        - name: AUTH_REDIRECT
+          description: Redirect path for unauthenticated users
+          default: /login
+
+    - name: src/routes/router.tsx
+      description: Minimal TanStack router factory with scroll restoration and stale-time config
+      target: src/routes/
+      required: false
+
 # Compatibility
 requires:
-  acp: >=2.8.0
+  acp: >=5.21.0
 
 # Tags for discovery
 tags:
@@ -77,3 +307,5 @@ tags:
   - cloudflare
   - fullstack
   - typescript
+  - starter-templates
+  - firebase

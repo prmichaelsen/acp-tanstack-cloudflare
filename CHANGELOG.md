@@ -5,6 +5,34 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-03-15
+
+### Added
+- **39 starter template files** in `agent/files/src/` — production-tested source code installable via `acp install tanstack-cloudflare --files`
+  - **UI Primitives** (5): Modal, SlideOverPanel, PillInput, Typeahead, SearchBar
+  - **Data Display** (9): SortableTable, MobileCardList, EntityTable, Paginator, PaginationToggle, PaginationSlideOver, ColumnFilter, SortIndicator, useSortableData
+  - **Layout** (5): UnifiedHeader, UnifiedFooter, Sidebar, MobileBottomNav, MenuDropdown
+  - **Wizard** (2): WizardShell, useWizardState
+  - **Auth** (5): AuthContext, AuthForm, login/logout/session API routes
+  - **Notifications** (5): NotificationBell, NotificationPanel, useNotifications, notification-hub DO, notifications-ws route
+  - **Media** (3): PhotoGallery, PhotoUpload, upload-manager DO
+  - **Infrastructure** (5): GlobalSearchContext, useActionToast, TOS consent, settings route, router
+- 5 new pattern documents:
+  - `wizard-system` — multi-step wizard with URL-synced state and sessionStorage
+  - `typeahead` — multi-select combobox with search and keyboard navigation
+  - `signed-url-upload` — two-phase upload with progress tracking
+  - `tos-consent` — versioned consent tracking with IP logging
+  - `mobile-bottom-nav` — fixed bottom navigation for mobile
+- ACP variable substitution support (APP_NAME, PRIMARY_COLOR, AUTH_REDIRECT)
+- `contents.files` section in package.yaml with 39 file entries
+- Design document for starter templates architecture
+
+### Changed
+- **BREAKING**: Package now ships `contents.files` (requires ACP >=5.21.0)
+- Package version bumped from 1.3.0 to 2.0.0
+- README reorganized with template file documentation, dependency table, and variable reference
+- Package now contains 48 patterns, 2 commands, and 39 template files
+
 ## [1.3.0] - 2026-03-15
 
 ### Added
