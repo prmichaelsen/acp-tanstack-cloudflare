@@ -47,6 +47,21 @@ milestones:
       Extracted from cleanbook-tanstack, generalized with ACP variable substitution.
       5 net-new pattern docs. Version bumped to 2.0.0.
 
+  - id: M4
+    name: Tier 1 Generic Component Extraction
+    status: not_started
+    progress: 0%
+    started: null
+    completed: null
+    estimated_weeks: 2
+    tasks_completed: 0
+    tasks_total: 17
+    file: agent/milestones/milestone-4-tier1-generic-components.md
+    notes: |
+      Extract 17 fully generic components from agentbase.me into package template files.
+      Source: audit-2 findings (Tier 1 — zero project-specific dependencies).
+      UI primitives, modals, media/image components, date picker, ToS consent dialog.
+
 tasks:
   milestone_1:
     - id: task-1
@@ -212,21 +227,166 @@ tasks:
         README: complete rewrite with template file tables, dependency guide, variable reference.
         CHANGELOG: v2.0.0 entry. Version bumped to 2.0.0.
 
+  milestone_4:
+    - id: task-16
+      name: Extract Button
+      status: not_started
+      file: agent/tasks/milestone-4-tier1-generic-components/task-16-button.md
+      estimated_hours: 0.5
+      started: null
+      actual_hours: null
+
+    - id: task-17
+      name: Extract Expander
+      status: not_started
+      file: agent/tasks/milestone-4-tier1-generic-components/task-17-expander.md
+      estimated_hours: 1
+      started: null
+      actual_hours: null
+
+    - id: task-18
+      name: Extract Popover
+      status: not_started
+      file: agent/tasks/milestone-4-tier1-generic-components/task-18-popover.md
+      estimated_hours: 0.5
+      started: null
+      actual_hours: null
+
+    - id: task-19
+      name: Extract ToggleSwitch
+      status: not_started
+      file: agent/tasks/milestone-4-tier1-generic-components/task-19-toggle-switch.md
+      estimated_hours: 0.5
+      started: null
+      actual_hours: null
+
+    - id: task-20
+      name: Extract Slider
+      status: not_started
+      file: agent/tasks/milestone-4-tier1-generic-components/task-20-slider.md
+      estimated_hours: 0.5
+      started: null
+      actual_hours: null
+
+    - id: task-21
+      name: Extract SubHeaderTabs
+      status: not_started
+      file: agent/tasks/milestone-4-tier1-generic-components/task-21-sub-header-tabs.md
+      estimated_hours: 0.5
+      started: null
+      actual_hours: null
+
+    - id: task-22
+      name: Extract MenuItem
+      status: not_started
+      file: agent/tasks/milestone-4-tier1-generic-components/task-22-menu-item.md
+      estimated_hours: 0.5
+      started: null
+      actual_hours: null
+
+    - id: task-23
+      name: Extract ConfirmationModal
+      status: not_started
+      file: agent/tasks/milestone-4-tier1-generic-components/task-23-confirmation-modal.md
+      estimated_hours: 0.5
+      started: null
+      actual_hours: null
+
+    - id: task-24
+      name: Extract SuccessModal
+      status: not_started
+      file: agent/tasks/milestone-4-tier1-generic-components/task-24-success-modal.md
+      estimated_hours: 0.5
+      started: null
+      actual_hours: null
+
+    - id: task-25
+      name: Extract ImageCarousel
+      status: not_started
+      file: agent/tasks/milestone-4-tier1-generic-components/task-25-image-carousel.md
+      estimated_hours: 1
+      started: null
+      actual_hours: null
+
+    - id: task-26
+      name: Extract ImageCrop
+      status: not_started
+      file: agent/tasks/milestone-4-tier1-generic-components/task-26-image-crop.md
+      estimated_hours: 1
+      started: null
+      actual_hours: null
+
+    - id: task-27
+      name: Extract ImageLightbox
+      status: not_started
+      file: agent/tasks/milestone-4-tier1-generic-components/task-27-image-lightbox.md
+      estimated_hours: 0.5
+      started: null
+      actual_hours: null
+
+    - id: task-28
+      name: Extract LightboxContainer
+      status: not_started
+      file: agent/tasks/milestone-4-tier1-generic-components/task-28-lightbox-container.md
+      estimated_hours: 0.5
+      started: null
+      actual_hours: null
+
+    - id: task-29
+      name: Extract CroppedImage
+      status: not_started
+      file: agent/tasks/milestone-4-tier1-generic-components/task-29-cropped-image.md
+      estimated_hours: 0.5
+      started: null
+      actual_hours: null
+
+    - id: task-30
+      name: Extract ImageUploadPreview
+      status: not_started
+      file: agent/tasks/milestone-4-tier1-generic-components/task-30-image-upload-preview.md
+      estimated_hours: 0.5
+      started: null
+      actual_hours: null
+
+    - id: task-31
+      name: Extract DateTimePicker
+      status: not_started
+      file: agent/tasks/milestone-4-tier1-generic-components/task-31-date-time-picker.md
+      estimated_hours: 1
+      started: null
+      actual_hours: null
+
+    - id: task-32
+      name: Extract TosConsentDialog
+      status: not_started
+      file: agent/tasks/milestone-4-tier1-generic-components/task-32-tos-consent-dialog.md
+      estimated_hours: 0.5
+      started: null
+      actual_hours: null
+
 documentation:
   design_documents: 1
-  milestone_documents: 1
+  milestone_documents: 2
   pattern_documents: 48
-  task_documents: 7
+  task_documents: 24
   command_documents: 2
   template_files: 39
 
 progress:
   planning: 100%
-  implementation: 100%
-  documentation: 100%
-  overall: 100%
+  implementation: 75%
+  documentation: 90%
+  overall: 80%
 
 recent_work:
+  - date: 2026-03-16
+    description: "M4 planned: 17 tasks for Tier 1 generic component extraction from agentbase.me"
+    items:
+      - ✅ Audited agentbase.me (166 components, 23 hooks, 10 contexts)
+      - ✅ Created audit report (audit-2-agentbase-me-extractable-ux-components.md)
+      - ✅ Planned M4 milestone with 17 individual extraction tasks (T16-T32)
+      - 📋 Next: execute T16-T32 to extract components
+
   - date: 2026-03-15
     description: "M3 complete: shipped 39 starter template files + 5 new patterns, bumped to v2.0.0"
     items:
@@ -259,6 +419,9 @@ recent_work:
       - ✅ Created 5 bug reports for ACP improvements
 
 next_steps:
+  - Execute M4 tasks T16-T32 (extract 17 generic components from agentbase.me)
+  - Update package.yaml and README with new template files
+  - Bump version to 2.1.0
   - Publish package with @acp.package-publish
   - Test installation in a fresh project
 
