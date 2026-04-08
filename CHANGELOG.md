@@ -5,6 +5,18 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-04-08
+
+### Added
+- 7 new pattern documents extracted from cleanbook-tanstack:
+  - `authenticated-loader` — createAuthenticatedLoader factory and requireSession helper for DRY route loaders
+  - `action-token-validation` — centralized token-parse/validate helpers for email action links (claim, confirm, decline)
+  - `subdomain-routing` — middleware that maps vanity subdomains to internal routes
+  - `search-param-validation` — inline and Zod-based validateSearch for type-safe URL search params
+  - `chat-messages-hook` — useChatMessages combining REST initial load with WebSocket live updates
+  - `perf-timing` — lightweight perf() utility for server-side operation timing
+  - `pagination-params-hook` — usePaginationParams for URL-synced page/pageSize/mode state
+
 ## [2.0.0] - 2026-03-15
 
 ### Added
